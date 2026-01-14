@@ -742,7 +742,7 @@
                 // 处理负号
                 if (ch === '-') {
                     this.pos++;
-                    const inner = this.parseFactor();
+                    let inner = this.parseFactor();
                     return this.negExpr(inner);
                 }
                 
@@ -755,7 +755,7 @@
                 // 处理括号
                 if (ch === '(') {
                     this.pos++;
-                    const inner = this.parseExpr();
+                    let inner = this.parseExpr();
                     this.skipSpaces();
                     
                     if (this.pos >= this.s.length || this.s[this.pos] !== ')') {
