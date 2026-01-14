@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>线性方程组求解器</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #202124;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px rgba(60,64,67,0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header h1 .material-icons {
+            font-size: 28px;
+        }
+        
+        .mode-toggle {
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .mode-btn {
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .mode-btn.active {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .mode-btn:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .content {
+            padding: 32px;
+        }
+        
+        .section {
+            margin-bottom: 32px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: #1a73e8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title .material-icons {
+            font-size: 24px;
+        }
+        
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .equation-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .equation-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .equation-number {
+            background-color: #1a73e8;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        
+        .input-container {
+            position: relative;
+            flex-grow: 1;
+        }
+        
+        .input-container input {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            border: 2px solid #dadce0;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+            font-family: 'Roboto', monospace;
+        }
+        
+        .input-container input:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        
+        .input-container label {
+            position: absolute;
+            left: 12px;
+            top: -8px;
+            background-color: white;
+            padding: 0 8px;
+            font-size: 12px;
+            color: #5f6368;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0d62d9;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+            background-color: #f1f3f4;
+            color: #202124;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e8eaed;
+        }
+        
+        .examples {
+            margin-top: 24px;
+        }
+        
+        .examples h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: #5f6368;
+        }
+        
+        .example-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .example-btn {
+            background: none;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .example-btn:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .result-section {
+            display: none;
+        }
+        
+        .result-section.show {
+            display: block;
+        }
+        
+        .result-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 16px;
+        }
+        
+        .result-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: #202124;
+        }
+        
+        .result-content {
+            font-family: 'Roboto', monospace;
+            white-space: pre-wrap;
+            margin-bottom: 16px;
+            line-height: 1.8;
+        }
+        
+        .solution-box {
+            background-color: #e8f0fe;
+            border-left: 4px solid #1a73e8;
+            padding: 16px;
+            margin-top: 16px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .solution-box h4 {
+            color: #1a73e8;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .solution-box p {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .error-box {
+            background-color: #fce8e6;
+            border-left: 4px solid #d93025;
+            padding: 16px;
+            margin-top: 16px;
+            border-radius: 0 4px 4px 0;
+            display: none;
+        }
+        
+        .error-box.show {
+            display: block;
+        }
+        
+        .error-box h4 {
+            color: #d93025;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .process-steps {
+            margin-top: 24px;
+        }
+        
+        .step {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        
+        .step-number {
+            background-color: #1a73e8;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 12px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .step-content {
+            flex-grow: 1;
+        }
+        
+        .step-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .step-detail {
+            color: #5f6368;
+            font-size: 14px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #5f6368;
+            font-size: 14px;
+            border-top: 1px solid #dadce0;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .equation-input {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .equation-number {
+                margin-bottom: 8px;
+            }
+            
+            .input-container {
+                width: 100%;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                justify-content: center;
+            }
+        }
+        
+        .input-hint {
+            font-size: 14px;
+            color: #5f6368;
+            margin-top: 8px;
+        }
+        
+        .success {
+            color: #0d8a1d;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="material-icons">calculate</span>
+                线性方程组求解器
+            </h1>
+            <div class="mode-toggle">
+                <button class="mode-btn active" id="modeOneVar">一元一次方程</button>
+                <button class="mode-btn" id="modeTwoVar">二元一次方程组</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="material-icons">edit</span>
+                    输入方程
+                </h2>
+                <div class="input-section">
+                    <div class="equation-inputs">
+                        <div class="equation-input" id="eq1-input">
+                            <div class="equation-number">1</div>
+                            <div class="input-container">
+                                <label for="eq1">第一个方程</label>
+                                <input type="text" id="eq1" placeholder="例如: 2x + 3 = 5x - 1">
+                            </div>
+                        </div>
+                        <div class="equation-input" id="eq2-input">
+                            <div class="equation-number">2</div>
+                            <div class="input-container">
+                                <label for="eq2">第二个方程</label>
+                                <input type="text" id="eq2" placeholder="例如: x + y = 5">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-hint">
+                        支持的格式: 2x+3=5, 3(x-2)=2x+1, (1/2)x = 3, x+y=5, 2x-3y=7
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-primary" id="solveBtn">
+                            <span class="material-icons">play_arrow</span>
+                            求解
+                        </button>
+                        <button class="btn btn-secondary" id="clearBtn">
+                            <span class="material-icons">clear</span>
+                            清空
+                        </button>
+                        <button class="btn btn-secondary" id="examplesBtn">
+                            <span class="material-icons">collections_bookmark</span>
+                            示例
+                        </button>
+                    </div>
+                    
+                    <div class="examples">
+                        <h3>示例方程</h3>
+                        <div class="example-list" id="exampleList">
+                            <!-- 示例将通过JavaScript动态添加 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="material-icons">visibility</span>
+                    求解过程与结果
+                </h2>
+                
+                <div class="error-box" id="errorBox">
+                    <h4>错误</h4>
+                    <div id="errorMessage"></div>
+                </div>
+                
+                <div class="result-section" id="resultSection">
+                    <div class="result-container">
+                        <div class="result-title">求解过程</div>
+                        <div class="process-steps" id="processSteps">
+                            <!-- 求解步骤将在这里动态生成 -->
+                        </div>
+                        
+                        <div class="solution-box" id="solutionBox">
+                            <!-- 解将在这里显示 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>线性方程组求解器 &copy; 2023 | 支持一元一次方程和二元一次方程组</p>
+        </div>
+    </div>
+
+    <script>
+        // 常量定义
+        const EPS = 1e-9;
+        
+        // 模式切换
+        const modeOneVarBtn = document.getElementById('modeOneVar');
+        const modeTwoVarBtn = document.getElementById('modeTwoVar');
+        const eq2InputContainer = document.getElementById('eq2-input');
+        const eq1Input = document.getElementById('eq1');
+        const eq2Input = document.getElementById('eq2');
+        
+        // 按钮和容器
+        const solveBtn = document.getElementById('solveBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const examplesBtn = document.getElementById('examplesBtn');
+        const exampleList = document.getElementById('exampleList');
+        const resultSection = document.getElementById('resultSection');
+        const errorBox = document.getElementById('errorBox');
+        const errorMessage = document.getElementById('errorMessage');
+        const processSteps = document.getElementById('processSteps');
+        const solutionBox = document.getElementById('solutionBox');
+        
+        // 当前模式：'oneVar' 或 'twoVar'
+        let currentMode = 'oneVar';
+        let solvingProcess = [];
+        
+        // 示例方程
+        const examples = {
+            oneVar: [
+                { eq1: "2x + 3 = 5x - 1", description: "简单一元方程" },
+                { eq1: "3(x - 2) = 2x + 1", description: "带括号方程" },
+                { eq1: "(1/2)x + 1/3 = 5/6", description: "分数系数" },
+                { eq1: "5 = 2x - 3", description: "变量在右侧" },
+                { eq1: "2(x+3) - 3(2x-1) = 4", description: "复杂括号展开" }
+            ],
+            twoVar: [
+                { eq1: "2x + y = 5", eq2: "x - y = 1", description: "简单二元方程组" },
+                { eq1: "3x + 2y = 7", eq2: "2x - y = 4", description: "标准形式" },
+                { eq1: "x/2 + y/3 = 1", eq2: "2x - y = 5", description: "分数系数" },
+                { eq1: "2(x+1) - y = 3", eq2: "x + 3(y-1) = 2", description: "带括号方程组" },
+                { eq1: "x + y = 10", eq2: "2x + 2y = 20", description: "无限解情况" },
+                { eq1: "x + y = 5", eq2: "x + y = 8", description: "无解情况" }
+            ]
+        };
+        
+        // 初始化
+        function init() {
+            // 设置初始模式
+            setMode('oneVar');
+            
+            // 加载示例
+            loadExamples();
+            
+            // 添加事件监听器
+            modeOneVarBtn.addEventListener('click', () => setMode('oneVar'));
+            modeTwoVarBtn.addEventListener('click', () => setMode('twoVar'));
+            solveBtn.addEventListener('click', solve);
+            clearBtn.addEventListener('click', clearInputs);
+            examplesBtn.addEventListener('click', loadExamples);
+            
+            // 输入框回车事件
+            eq1Input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') solve();
+            });
+            
+            eq2Input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') solve();
+            });
+        }
+        
+        // 设置模式
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // 更新UI
+            if (mode === 'oneVar') {
+                modeOneVarBtn.classList.add('active');
+                modeTwoVarBtn.classList.remove('active');
+                eq2InputContainer.style.display = 'none';
+                eq1Input.placeholder = "例如: 2x + 3 = 5x - 1";
+                document.getElementById('eq1').previousElementSibling.textContent = "方程";
+            } else {
+                modeOneVarBtn.classList.remove('active');
+                modeTwoVarBtn.classList.add('active');
+                eq2InputContainer.style.display = 'flex';
+                eq1Input.placeholder = "例如: 2x + y = 5";
+                document.getElementById('eq1').previousElementSibling.textContent = "第一个方程";
+            }
+            
+            // 加载对应示例
+            loadExamples();
+            
+            // 清空结果
+            clearResults();
+        }
+        
+        // 加载示例
+        function loadExamples() {
+            exampleList.innerHTML = '';
+            const modeExamples = examples[currentMode];
+            
+            modeExamples.forEach(example => {
+                const button = document.createElement('button');
+                button.className = 'example-btn';
+                button.textContent = example.description;
+                button.addEventListener('click', () => {
+                    eq1Input.value = example.eq1;
+                    if (currentMode === 'twoVar') {
+                        eq2Input.value = example.eq2;
+                    }
+                });
+                exampleList.appendChild(button);
+            });
+        }
+        
+        // 清空输入
+        function clearInputs() {
+            eq1Input.value = '';
+            eq2Input.value = '';
+            clearResults();
+        }
+        
+        // 清空结果
+        function clearResults() {
+            resultSection.classList.remove('show');
+            errorBox.classList.remove('show');
+            processSteps.innerHTML = '';
+            solutionBox.innerHTML = '';
+        }
+        
+        // 显示错误
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorBox.classList.add('show');
+            resultSection.classList.remove('show');
+        }
+        
+        // 显示结果
+        function showResults() {
+            errorBox.classList.remove('show');
+            resultSection.classList.add('show');
+        }
+        
+        // 添加求解步骤
+        function addStep(stepNumber, title, detail) {
+            solvingProcess.push({ stepNumber, title, detail });
+            
+            const stepElement = document.createElement('div');
+            stepElement.className = 'step';
+            stepElement.innerHTML = `
+                <div class="step-number">${stepNumber}</div>
+                <div class="step-content">
+                    <div class="step-title">${title}</div>
+                    <div class="step-detail">${detail}</div>
+                </div>
+            `;
+            
+            processSteps.appendChild(stepElement);
+        }
+        
+        // 显示解
+        function showSolution(solution) {
+            solutionBox.innerHTML = `
+                <h4>方程的解</h4>
+                <p>${solution}</p>
+            `;
+        }
+        
+        // 解析器类
+        class Parser {
+            constructor(str, mode) {
+                this.s = str;
+                this.pos = 0;
+                this.mode = mode;
+            }
+            
+            skipSpaces() {
+                while (this.pos < this.s.length && this.isSpace(this.s[this.pos])) {
+                    this.pos++;
+                }
+            }
+            
+            isSpace(ch) {
+                return ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r';
+            }
+            
+            parse() {
+                const result = this.parseExpr();
+                this.skipSpaces();
+                
+                if (this.pos < this.s.length) {
+                    throw new Error(`表达式后面有多余字符: "${this.s.substring(this.pos)}"`);
+                }
+                
+                return result;
+            }
+            
+            parseExpr() {
+                this.skipSpaces();
+                let result = this.parseTerm();
+                
+                while (this.pos < this.s.length) {
+                    this.skipSpaces();
+                    if (this.pos >= this.s.length) break;
+                    
+                    const op = this.s[this.pos];
+                    if (op !== '+' && op !== '-') break;
+                    
+                    this.pos++;
+                    this.skipSpaces();
+                    const nextTerm = this.parseTerm();
+                    
+                    if (op === '+') {
+                        result = this.addExpr(result, nextTerm);
+                    } else {
+                        result = this.subExpr(result, nextTerm);
+                    }
+                }
+                
+                return result;
+            }
+            
+            parseTerm() {
+                this.skipSpaces();
+                let result = this.parseFactor();
+                
+                while (this.pos < this.s.length) {
+                    this.skipSpaces();
+                    if (this.pos >= this.s.length) break;
+                    
+                    const op = this.s[this.pos];
+                    if (op !== '*' && op !== '/') break;
+                    
+                    this.pos++;
+                    this.skipSpaces();
+                    const nextFactor = this.parseFactor();
+                    
+                    if (op === '*') {
+                        result = this.mulExpr(result, nextFactor);
+                    } else {
+                        result = this.divExpr(result, nextFactor);
+                    }
+                }
+                
+                return result;
+            }
+            
+            parseFactor() {
+                this.skipSpaces();
+                if (this.pos >= this.s.length) {
+                    throw new Error('表达式意外结束');
+                }
+                
+                const ch = this.s[this.pos];
+                
+                // 处理负号
+                if (ch === '-') {
+                    this.pos++;
+                    const inner = this.parseFactor();
+                    return this.negExpr(inner);
+                }
+                
+                // 处理正号
+                if (ch === '+') {
+                    this.pos++;
+                    return this.parseFactor();
+                }
+                
+                // 处理括号
+                if (ch === '(') {
+                    this.pos++;
+                    const inner = this.parseExpr();
+                    this.skipSpaces();
+                    
+                    if (this.pos >= this.s.length || this.s[this.pos] !== ')') {
+                        throw new Error('括号不匹配');
+                    }
+                    
+                    this.pos++;
+                    
+                    // 处理括号后的隐式乘法
+                    this.skipSpaces();
+                    while (this.pos < this.s.length && 
+                          (this.s[this.pos] === 'x' || this.s[this.pos] === 'y' || this.s[this.pos] === '(')) {
+                        let next;
+                        if (this.s[this.pos] === 'x') {
+                            this.pos++;
+                            next = this.createVarExpr('x');
+                        } else if (this.s[this.pos] === 'y') {
+                            if (this.mode === 'oneVar') {
+                                throw new Error('一元方程中不允许变量 y');
+                            }
+                            this.pos++;
+                            next = this.createVarExpr('y');
+                        } else if (this.s[this.pos] === '(') {
+                            this.pos++;
+                            next = this.parseExpr();
+                            this.skipSpaces();
+                            
+                            if (this.pos >= this.s.length || this.s[this.pos] !== ')') {
+                                throw new Error('隐式乘法中的括号不匹配');
+                            }
+                            this.pos++;
+                        }
+                        inner = this.mulExpr(inner, next);
+                        this.skipSpaces();
+                    }
+                    
+                    return inner;
+                }
+                
+                // 处理数字
+                if (this.isDigit(ch) || ch === '.') {
+                    let num = 0;
+                    let hasInteger = false;
+                    let hasFraction = false;
+                    
+                    // 整数部分
+                    while (this.pos < this.s.length && this.isDigit(this.s[this.pos])) {
+                        hasInteger = true;
+                        num = num * 10 + (this.s.charCodeAt(this.pos) - 48);
+                        this.pos++;
+                    }
+                    
+                    // 小数部分
+                    if (this.pos < this.s.length && this.s[this.pos] === '.') {
+                        this.pos++;
+                        if (this.pos >= this.s.length || !this.isDigit(this.s[this.pos])) {
+                            throw new Error('无效的数字格式');
+                        }
+                        
+                        let frac = 0;
+                        let base = 0.1;
+                        while (this.pos < this.s.length && this.isDigit(this.s[this.pos])) {
+                            hasFraction = true;
+                            frac += (this.s.charCodeAt(this.pos) - 48) * base;
+                            base /= 10;
+                            this.pos++;
+                        }
+                        num += frac;
+                    }
+                    
+                    if (!hasInteger && !hasFraction) {
+                        throw new Error(`位置 ${this.pos} 处的数字无效`);
+                    }
+                    
+                    let result = this.createConstExpr(num);
+                    
+                    // 处理隐式乘法：数字后跟变量或括号
+                    this.skipSpaces();
+                    if (this.pos < this.s.length && 
+                        (this.s[this.pos] === 'x' || this.s[this.pos] === 'y' || this.s[this.pos] === '(')) {
+                        let next;
+                        if (this.s[this.pos] === 'x') {
+                            this.pos++;
+                            next = this.createVarExpr('x');
+                        } else if (this.s[this.pos] === 'y') {
+                            if (this.mode === 'oneVar') {
+                                throw new Error('一元方程中不允许变量 y');
+                            }
+                            this.pos++;
+                            next = this.createVarExpr('y');
+                        } else if (this.s[this.pos] === '(') {
+                            this.pos++;
+                            next = this.parseExpr();
+                            this.skipSpaces();
+                            
+                            if (this.pos >= this.s.length || this.s[this.pos] !== ')') {
+                                throw new Error('隐式乘法中的括号不匹配');
+                            }
+                            this.pos++;
+                        }
+                        result = this.mulExpr(result, next);
+                    }
+                    
+                    return result;
+                }
+                
+                // 处理变量
+                if (ch === 'x' || ch === 'y') {
+                    if (ch === 'y' && this.mode === 'oneVar') {
+                        throw new Error('一元方程中不允许变量 y');
+                    }
+                    
+                    this.pos++;
+                    
+                    // 检查无效的变量名
+                    if (this.pos < this.s.length && (this.isAlpha(this.s[this.pos]) || this.isDigit(this.s[this.pos]))) {
+                        throw new Error('只允许变量 x 和 y');
+                    }
+                    
+                    return this.createVarExpr(ch);
+                }
+                
+                throw new Error(`位置 ${this.pos} 处的意外字符 '${this.s[this.pos]}'`);
+            }
+            
+            isDigit(ch) {
+                return ch >= '0' && ch <= '9';
+            }
+            
+            isAlpha(ch) {
+                return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+            }
+            
+            // 表达式操作
+            addExpr(a, b) {
+                if (this.mode === 'oneVar') {
+                    return { coeff: a.coeff + b.coeff, constant: a.constant + b.constant };
+                } else {
+                    return { 
+                        coeff_x: a.coeff_x + b.coeff_x, 
+                        coeff_y: a.coeff_y + b.coeff_y, 
+                        constant: a.constant + b.constant 
+                    };
+                }
+            }
+            
+            subExpr(a, b) {
+                if (this.mode === 'oneVar') {
+                    return { coeff: a.coeff - b.coeff, constant: a.constant - b.constant };
+                } else {
+                    return { 
+                        coeff_x: a.coeff_x - b.coeff_x, 
+                        coeff_y: a.coeff_y - b.coeff_y, 
+                        constant: a.constant - b.constant 
+                    };
+                }
+            }
+            
+            mulExpr(a, b) {
+                if (this.mode === 'oneVar') {
+                    // 检查二次项
+                    if (Math.abs(a.coeff) > EPS && Math.abs(b.coeff) > EPS) {
+                        throw new Error('检测到二次项（例如 x*x）');
+                    }
+                    
+                    if (Math.abs(a.coeff) > EPS) {
+                        // a 是 kx+b，b 是常数
+                        if (Math.abs(b.coeff) > EPS) {
+                            throw new Error('无效的乘法');
+                        }
+                        return { coeff: a.coeff * b.constant, constant: a.constant * b.constant };
+                    } else if (Math.abs(b.coeff) > EPS) {
+                        // b 是 kx+b，a 是常数
+                        return { coeff: b.coeff * a.constant, constant: b.constant * a.constant };
+                    } else {
+                        // 两个都是常数
+                        return { coeff: 0.0, constant: a.constant * b.constant };
+                    }
+                } else {
+                    // 二元模式
+                    const a_has_var = Math.abs(a.coeff_x) > EPS || Math.abs(a.coeff_y) > EPS;
+                    const b_has_var = Math.abs(b.coeff_x) > EPS || Math.abs(b.coeff_y) > EPS;
+                    
+                    if (a_has_var && b_has_var) {
+                        throw new Error('检测到二次项（例如 x*y 或 x*x）');
+                    }
+                    
+                    if (a_has_var) {
+                        if (Math.abs(b.coeff_x) > EPS || Math.abs(b.coeff_y) > EPS) {
+                            throw new Error('变量相乘无效');
+                        }
+                        const factor = b.constant;
+                        return {
+                            coeff_x: a.coeff_x * factor,
+                            coeff_y: a.coeff_y * factor,
+                            constant: a.constant * factor
+                        };
+                    } else if (b_has_var) {
+                        if (Math.abs(a.coeff_x) > EPS || Math.abs(a.coeff_y) > EPS) {
+                            throw new Error('变量相乘无效');
+                        }
+                        const factor = a.constant;
+                        return {
+                            coeff_x: b.coeff_x * factor,
+                            coeff_y: b.coeff_y * factor,
+                            constant: b.constant * factor
+                        };
+                    } else {
+                        return { coeff_x: 0.0, coeff_y: 0.0, constant: a.constant * b.constant };
+                    }
+                }
+            }
+            
+            divExpr(a, b) {
+                if (this.mode === 'oneVar') {
+                    if (Math.abs(b.coeff) > EPS) {
+                        throw new Error('分母中含有变量');
+                    }
+                    
+                    if (Math.abs(b.constant) < EPS) {
+                        throw new Error('除以零');
+                    }
+                    
+                    return { coeff: a.coeff / b.constant, constant: a.constant / b.constant };
+                } else {
+                    if (Math.abs(b.coeff_x) > EPS || Math.abs(b.coeff_y) > EPS) {
+                        throw new Error('分母中含有变量');
+                    }
+                    
+                    if (Math.abs(b.constant) < EPS) {
+                        throw new Error('除以零');
+                    }
+                    
+                    const factor = 1.0 / b.constant;
+                    return {
+                        coeff_x: a.coeff_x * factor,
+                        coeff_y: a.coeff_y * factor,
+                        constant: a.constant * factor
+                    };
+                }
+            }
+            
+            negExpr(expr) {
+                if (this.mode === 'oneVar') {
+                    return { coeff: -expr.coeff, constant: -expr.constant };
+                } else {
+                    return { 
+                        coeff_x: -expr.coeff_x, 
+                        coeff_y: -expr.coeff_y, 
+                        constant: -expr.constant 
+                    };
+                }
+            }
+            
+            createConstExpr(value) {
+                if (this.mode === 'oneVar') {
+                    return { coeff: 0.0, constant: value };
+                } else {
+                    return { coeff_x: 0.0, coeff_y: 0.0, constant: value };
+                }
+            }
+            
+            createVarExpr(varName) {
+                if (this.mode === 'oneVar') {
+                    return { coeff: 1.0, constant: 0.0 };
+                } else {
+                    if (varName === 'x') {
+                        return { coeff_x: 1.0, coeff_y: 0.0, constant: 0.0 };
+                    } else {
+                        return { coeff_x: 0.0, coeff_y: 1.0, constant: 0.0 };
+                    }
+                }
+            }
+        }
+        
+        // 预处理字符串（移除空格）
+        function preprocess(str) {
+            return str.replace(/\s+/g, '');
+        }
+        
+        // 解析方程
+        function parseEquation(eqStr, mode) {
+            const eqPos = eqStr.indexOf('=');
+            if (eqPos === -1) {
+                throw new Error('方程中缺少等号');
+            }
+            
+            const leftStr = eqStr.substring(0, eqPos);
+            const rightStr = eqStr.substring(eqPos + 1);
+            
+            if (leftStr.length === 0 || rightStr.length === 0) {
+                throw new Error('等号一侧缺少表达式');
+            }
+            
+            // 解析左侧
+            const parserLeft = new Parser(leftStr, mode);
+            const leftExpr = parserLeft.parse();
+            
+            // 解析右侧
+            const parserRight = new Parser(rightStr, mode);
+            const rightExpr = parserRight.parse();
+            
+            // 组合：左侧 - 右侧 = 0
+            if (mode === 'oneVar') {
+                return {
+                    coeff: leftExpr.coeff - rightExpr.coeff,
+                    constant: leftExpr.constant - rightExpr.constant
+                };
+            } else {
+                return {
+                    coeff_x: leftExpr.coeff_x - rightExpr.coeff_x,
+                    coeff_y: leftExpr.coeff_y - rightExpr.coeff_y,
+                    constant: leftExpr.constant - rightExpr.constant
+                };
+            }
+        }
+        
+        // 求解一元方程
+        function solveOneVar(eq1Str) {
+            solvingProcess = [];
+            processSteps.innerHTML = '';
+            
+            addStep(1, "解析方程", `解析方程: ${eq1Str}`);
+            
+            try {
+                const eq = parseEquation(eq1Str, 'oneVar');
+                
+                addStep(2, "转换为标准形式", 
+                    `将方程转换为标准形式 ax + b = 0:<br>(${formatCoefficient(eq.coeff, 'x')}) + (${formatConstant(eq.constant)}) = 0`);
+                
+                // 检查退化情况
+                if (Math.abs(eq.coeff) < EPS) {
+                    if (Math.abs(eq.constant) < EPS) {
+                        addStep(3, "分析结果", "方程退化为 0 = 0");
+                        showSolution("无限解");
+                        return "无限解";
+                    } else {
+                        addStep(3, "分析结果", `方程退化为 ${formatConstant(eq.constant)} = 0，这是不可能的`);
+                        showSolution("无解");
+                        return "无解";
+                    }
+                }
+                
+                // 求解 x
+                const x = -eq.constant / eq.coeff;
+                
+                addStep(3, "求解", 
+                    `x = -b / a = -(${formatConstant(eq.constant)}) / (${formatCoefficient(eq.coeff, '')}) = ${formatNumber(x)}`);
+                
+                addStep(4, "结果验证", 
+                    `将 x = ${formatNumber(x)} 代入原方程验证`);
+                
+                const solution = `x = ${formatNumber(x)}`;
+                showSolution(solution);
+                return solution;
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        // 求解二元方程组
+        function solveTwoVar(eq1Str, eq2Str) {
+            solvingProcess = [];
+            processSteps.innerHTML = '';
+            
+            addStep(1, "解析方程组", `解析方程:<br>1) ${eq1Str}<br>2) ${eq2Str}`);
+            
+            try {
+                const eq1 = parseEquation(eq1Str, 'twoVar');
+                const eq2 = parseEquation(eq2Str, 'twoVar');
+                
+                addStep(2, "转换为标准形式", 
+                    `将方程转换为标准形式 ax + by + c = 0:<br>
+                     1) ${formatCoefficient(eq1.coeff_x, 'x')} + ${formatCoefficient(eq1.coeff_y, 'y')} + ${formatConstant(eq1.constant)} = 0<br>
+                     2) ${formatCoefficient(eq2.coeff_x, 'x')} + ${formatCoefficient(eq2.coeff_y, 'y')} + ${formatConstant(eq2.constant)} = 0`);
+                
+                // 提取系数
+                const a1 = eq1.coeff_x, b1 = eq1.coeff_y, c1 = eq1.constant;
+                const a2 = eq2.coeff_x, b2 = eq2.coeff_y, c2 = eq2.constant;
+                
+                // 检查退化方程
+                const eq1_degenerate = Math.abs(a1) < EPS && Math.abs(b1) < EPS;
+                const eq2_degenerate = Math.abs(a2) < EPS && Math.abs(b2) < EPS;
+                
+                if (eq1_degenerate && eq2_degenerate) {
+                    if (Math.abs(c1) < EPS && Math.abs(c2) < EPS) {
+                        addStep(3, "分析结果", "两个方程都退化为 0 = 0");
+                        showSolution("无限解");
+                        return "无限解";
+                    } else {
+                        addStep(3, "分析结果", "两个方程都退化为常数 = 0，但常数不为零");
+                        showSolution("无解");
+                        return "无解";
+                    }
+                }
+                
+                if (eq1_degenerate) {
+                    if (Math.abs(c1) < EPS) {
+                        addStep(3, "分析结果", "第一个方程退化为 0 = 0，使用第二个方程");
+                        showSolution("无限解");
+                        return "无限解";
+                    } else {
+                        addStep(3, "分析结果", "第一个方程退化为常数 = 0，但常数不为零");
+                        showSolution("无解");
+                        return "无解";
+                    }
+                }
+                
+                if (eq2_degenerate) {
+                    if (Math.abs(c2) < EPS) {
+                        addStep(3, "分析结果", "第二个方程退化为 0 = 0，使用第一个方程");
+                        showSolution("无限解");
+                        return "无限解";
+                    } else {
+                        addStep(3, "分析结果", "第二个方程退化为常数 = 0，但常数不为零");
+                        showSolution("无解");
+                        return "无解";
+                    }
+                }
+                
+                // 计算行列式
+                const D = a1 * b2 - a2 * b1;
+                addStep(3, "计算行列式", 
+                    `D = a1*b2 - a2*b1 = (${formatNumber(a1)})*(${formatNumber(b2)}) - (${formatNumber(a2)})*(${formatNumber(b1)}) = ${formatNumber(D)}`);
+                
+                if (Math.abs(D) < EPS) {
+                    // 检查方程是否成比例
+                    let ratio;
+                    if (Math.abs(a2) > EPS) {
+                        ratio = a1 / a2;
+                    } else if (Math.abs(b2) > EPS) {
+                        ratio = b1 / b2;
+                    }
+                    
+                    const proportional = Math.abs(a1 - ratio * a2) < EPS && 
+                                        Math.abs(b1 - ratio * b2) < EPS && 
+                                        Math.abs(c1 - ratio * c2) < EPS;
+                    
+                    if (proportional) {
+                        addStep(4, "分析结果", "两个方程成比例，表示同一条直线");
+                        showSolution("无限解");
+                        return "无限解";
+                    } else {
+                        addStep(4, "分析结果", "两个方程平行但不重合");
+                        showSolution("无解");
+                        return "无解";
+                    }
+                }
+                
+                // 求解 x 和 y
+                const x = (b2 * c1 - b1 * c2) / D;
+                const y = (a1 * c2 - a2 * c1) / D;
+                
+                addStep(4, "使用克莱姆法则求解", 
+                    `x = (b2*c1 - b1*c2) / D = (${formatNumber(b2)}*${formatNumber(c1)} - ${formatNumber(b1)}*${formatNumber(c2)}) / ${formatNumber(D)} = ${formatNumber(x)}<br>
+                     y = (a1*c2 - a2*c1) / D = (${formatNumber(a1)}*${formatNumber(c2)} - ${formatNumber(a2)}*${formatNumber(c1)}) / ${formatNumber(D)} = ${formatNumber(y)}`);
+                
+                addStep(5, "结果验证", 
+                    `将解代入原方程验证`);
+                
+                const solution = `x = ${formatNumber(x)}, y = ${formatNumber(y)}`;
+                showSolution(solution);
+                return solution;
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        // 格式化系数
+        function formatCoefficient(coeff, variable) {
+            if (Math.abs(coeff) < EPS) return "0";
+            
+            if (Math.abs(coeff - 1) < EPS) return variable;
+            if (Math.abs(coeff + 1) < EPS) return `-${variable}`;
+            
+            return `${formatNumber(coeff)}${variable}`;
+        }
+        
+        // 格式化常数
+        function formatConstant(constant) {
+            return formatNumber(constant);
+        }
+        
+        // 格式化数字
+        function formatNumber(num) {
+            if (Math.abs(num) < EPS) return "0";
+            
+            // 检查是否为整数
+            if (Math.abs(Math.round(num) - num) < EPS * Math.abs(num)) {
+                return Math.round(num).toString();
+            }
+            
+            // 保留6位小数
+            return num.toFixed(6).replace(/\.?0+$/, '');
+        }
+        
+        // 主求解函数
+        function solve() {
+            try {
+                clearResults();
+                
+                const eq1Str = preprocess(eq1Input.value.trim());
+                if (!eq1Str) {
+                    showError('请输入第一个方程');
+                    return;
+                }
+                
+                let solution;
+                
+                if (currentMode === 'oneVar') {
+                    solution = solveOneVar(eq1Str);
+                } else {
+                    const eq2Str = preprocess(eq2Input.value.trim());
+                    if (!eq2Str) {
+                        showError('请输入第二个方程');
+                        return;
+                    }
+                    solution = solveTwoVar(eq1Str, eq2Str);
+                }
+                
+                showResults();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+        
+        // 初始化应用
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
